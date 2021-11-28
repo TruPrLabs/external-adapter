@@ -1,17 +1,19 @@
+## Purpose of the adapter
+
+The adapter was made as part of the Chainlink Fall Hackathon. It fetches tweets from the Twitter API and checks if they fulfill certain conditions.
+
 ## Creating your own adapter from this
 
-Node address: 0x14e7b28E28a69955D5Cf3a68Eefa56FeA617ac1f
-
-Clone this repo and change "Tweet-EA" below to the name of your project
+Clone this repo and change "external-adapter" below to the name of your project
 
 ```bash
-git clone https://github.com/tuturu-tech/tweet-checker-adapter Tweet-EA
+git clone https://github.com/TruPrLabs/external-adapter
 ```
 
 Enter into the newly-created directory
 
 ```bash
-cd Tweet-EA
+cd external-adapter
 ```
 
 You can remove the existing git history by running:
@@ -21,32 +23,6 @@ rm -rf .git
 ```
 
 See [Install Locally](#install-locally) for a quickstart
-
-## Input Params
-
-- `endpoint`: The endpoint you want to use. Supported enpoints below.
-
-1. User Timeline endpoint: `user_timeline.json`
-
-- `userid`: The id of the Twitter user
-- `tweetHash`: The Keccak256 hash of the tweet text
-- `count`: (optional) The amount of tweets to fetch from the user timeline, starting with the latest one.
-  _Default is 1._
-
-2. Tweet lookup endpoint: `lookup.json`
-
-- `tweetHash`: The Keccak256 hash of the tweet user id + tweet text
-- `tweetids`: An array of tweet ids
-
-## Output
-
-```json
-{
-  "jobRunID": "9ec03b54-437b-4b69-abe0-a80dcf466b7b",
-  "result": { "hashCheck": true, "tweetArray": [] },
-  "statusCode": 200
-}
-```
 
 ## Use external adapter
 
@@ -93,55 +69,10 @@ yarn start
 
 Takes in a userid and a hash and looks up the users' latest tweet, hashes the text and compares it with the inputed hash.
 
-Task creation for testing purposes:
-"1","0xB498e4A7E01ADbBfd5Ce0Ea5bC67eB208cd5f1dC","1395461422121984004","0x62a2BA2cf2DeAabA6CdBF4E49765575d13Fc6083","1000000000000000000","1634218319","1638392085","1","0x83da950bf0a928aed2c5167ac121d7d59ac9e0a0efa3f4e54ff94218ca6a6a8f"
-
-Takes in a tweet id and fetches the tweet text and author username, hashes it and compares with inputed hash.
-
-curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": {"endpoint": "Discord" } }'
-
 SUCCESS
 
 ```bash
 curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": {"taskId": "0", "timeWindowStart": "1634218319", "timeWindowEnd": "1638392085", "taskData": { "promoterId": "1395461422121984004","taskHash": "0xdf3a181421f5b2c6fdbf6fb945da6d8d02d92c000d3c0fd7035ef6e140c47f11", "platform": "Twitter", "metric": "like_count", "endpoint": "UserTimeline" } } }'
-```
-
-expected hash: 0xdf3a181421f5b2c6fdbf6fb945da6d8d02d92c000d3c0fd7035ef6e140c47f11
-
-```bash
-curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": {"taskId": "0", "timeWindowStart": "1634218319", "timeWindowEnd": "1638392085", "taskData": {"taskHash": "0xdf3a181421f5b2c6fdbf6fb945da6d8d02d92c000d3c0fd7035ef6e140c47f11", "platform": "Twitter", "metric": "like_count", "endpoint": "Public" }, "userAddress": "0xB498e4A7E01ADbBfd5Ce0Ea5bC67eB208cd5f1dC", "user_id": "1395461422121984004"  } }'
-```
-
-FAIL
-
-```bash
-curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": {"taskId": "0", "promoterId": "1395461422121984004", "timeWindowStart": "1637218319", "timeWindowEnd": "1638392085", "taskHash": "0xbe611fa9e3a341d1f59df049685fb42c9d7d2dadc0765019c5490335f21f9818", "endpoint": "UserTimeline" } }'
-```
-
-NO START TIME
-
-```bash
-curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": {"taskId": "0", "promoterId": "1395461422121984004", "timeWindowEnd": "1638392085", "taskHash": "0xbe611fa9e3a341d1f59df049685fb42c9d7d2dadc0765019c5490335f21f9818", "endpoint": "UserTimeline" } }'
-```
-
-WRONG ENDPOINT
-
-```bash
-curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": {"taskId": "0", "promoterId": "1395461422121984004", "timeWindowEnd": "1638392085", "taskHash": "0xbe611fa9e3a341d1f59df049685fb42c9d7d2dadc0765019c5490335f21f9818", "endpoint": "something" } }'
-```
-
-```bash
-curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": {"tweetIds": "1278747501642657792,1255542774432063488", "tweetHash": "0xbe611fa9e3a341d1f59df049685fb42c9d7d2dadc0765019c5490335f21f9818", "endpoint": "TweetLookup" } }'
-```
-
-```bash
-curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": { "tweetids": "1447545650925682696", "tweetHash": "536c3cb79ae5a519c525dca22f9f166e6067b253178557ea579aec649eb5fd0c", "endpoint": "tweets?ids=" } }'
-```
-
-Same as above but with multiple tweet ids
-
-```bash
-curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": { "tweetids": "1447545650925682696,1440043399961219074", "tweetHash": "536c3cb79ae5a519c525dca22f9f166e6067b253178557ea579aec649eb5fd0c", "endpoint": "lookup.json" } }'
 ```
 
 ## Docker
@@ -227,7 +158,3 @@ If using a REST API Gateway, you will need to disable the Lambda proxy integrati
 - Click More, Add variable (repeat for all environment variables)
   - NAME: API_KEY
   - VALUE: Your_API_key
-
-0x6b64617461456e636f646564590180000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000aac1d92e356144c6b3032297df02897f273c898c000000000000000000000000b498e4a7e01adbbfd5ce0ea5bc67eb208cd5f1dc000000000000000000000000000000000000000000000000135dacc51b57a004000000000000000000000000cb2c2e85c9e89860bb8d52d075af790e2fe4ae4e0000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000006186b5cf0000000000000000000000000000000000000000000000000000000061895c95000000000000000000000000000000000000000000000000000000000000000183da950bf0a928aed2c5167ac121d7d59ac9e0a0efa3f4e54ff94218ca6a6a8f
-
-0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000aac1d92e356144c6b3032297df02897f273c898c000000000000000000000000b498e4a7e01adbbfd5ce0ea5bc67eb208cd5f1dc000000000000000000000000000000000000000000000000135dacc51b57a004000000000000000000000000cb2c2e85c9e89860bb8d52d075af790e2fe4ae4e0000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000006186b5cf0000000000000000000000000000000000000000000000000000000061895c95000000000000000000000000000000000000000000000000000000000000000183da950bf0a928aed2c5167ac121d7d59ac9e0a0efa3f4e54ff94218ca6a6a8f
